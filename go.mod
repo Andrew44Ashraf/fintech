@@ -1,4 +1,4 @@
-module github.com/Andrew44Ashraf/fintech-service
+module fintech-service
 
 go 1.21
 
