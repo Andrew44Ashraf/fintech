@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"fintech-service/internal/database"
-	"fintech-service/internal/repository"
+	"github.com/Andrew44Ashraf/fintech-service/internal/database"
+	"github.com/Andrew44Ashraf/fintech-service/internal/repository"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"

@@ -2,8 +2,8 @@ package tests
 
 import (
 	"database/sql"
-	"fintech-service/internal/database"
-	"fintech-service/internal/repository"
+	"github.com/Andrew44Ashraf/fintech-service/internal/database"
+	"github.com/Andrew44Ashraf/fintech-service/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"

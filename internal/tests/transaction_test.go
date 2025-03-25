@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"fintech-service/internal/models"
-	"fintech-service/internal/repository"
+	"github.com/Andrew44Ashraf/fintech-service/internal/models"
+	"github.com/Andrew44Ashraf/fintech-service/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

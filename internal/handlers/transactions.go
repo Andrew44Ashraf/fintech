@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"fintech-service/internal/database"
-	"fintech-service/internal/models"
-	"fintech-service/internal/repository"
+	"github.com/Andrew44Ashraf/fintech-service/internal/database"
+	"github.com/Andrew44Ashraf/fintech-service/internal/models"
+	"github.com/Andrew44Ashraf/fintech-service/internal/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"log"

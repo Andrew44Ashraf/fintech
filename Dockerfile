@@ -13,7 +13,7 @@ RUN go mod tidy || true
 COPY . .
 
 # Build the application
-RUN go build -o fintech_service ./cmd/main.go
+RUN go mod init github.com/Andrew44Ashraf/fintech-service
 
 EXPOSE 8080
 

@@ -2,8 +2,8 @@ package tests
 
 import (
 	"bytes"
-	"fintech-service/internal/database"
-	"fintech-service/internal/routes"
+	"github.com/Andrew44Ashraf/fintech-service/internal/database"
+	"github.com/Andrew44Ashraf/fintech-service/internal/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
