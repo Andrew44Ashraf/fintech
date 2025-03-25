@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fintech-service/internal/database"
-	"fintech-service/internal/routes"
-	"github.com/gin-gonic/gin"
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
-	"log"
-	_ "fintech-service/docs" // Import generated Swagger docs
+    "github.com/Andrew44Ashraf/fintech-service/internal/database"
+    "github.com/Andrew44Ashraf/fintech-service/internal/routes"
+    "github.com/gin-gonic/gin"
+    "github.com/swaggo/files"
+    "github.com/swaggo/gin-swagger"
+    "log"
 )
 
 // @title Fintech API
