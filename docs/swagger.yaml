@@ -1,0 +1,192 @@
+definitions:
+  requests.DepositRequest:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
+  requests.OpenAccountRequest:
+    properties:
+      initial_balance:
+        minimum: 0
+        type: number
+    type: object
+  requests.WithdrawRequest:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
+  responses.AccountResponse:
+    properties:
+      account_id:
+        type: integer
+    type: object
+  responses.BalanceResponse:
+    properties:
+      balance:
+        type: number
+    type: object
+  responses.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  responses.TransactionResponse:
+    properties:
+      amount:
+        type: number
+      id:
+        type: integer
+      new_balance:
+        type: number
+      timestamp:
+        type: string
+      type:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /accounts:
+    post:
+      consumes:
+      - application/json
+      description: Opens a new account with optional initial balance
+      parameters:
+      - description: Optional initial balance
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/requests.OpenAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.AccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create a new account
+      tags:
+      - accounts
+  /accounts/{id}/balance:
+    get:
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.BalanceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Get account balance
+      tags:
+      - accounts
+  /accounts/{id}/deposit:
+    post:
+      consumes:
+      - application/json
+      description: Deposits money into an account
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Deposit amount
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/requests.DepositRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.TransactionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Deposit funds
+      tags:
+      - transactions
+  /accounts/{id}/withdraw:
+    post:
+      consumes:
+      - application/json
+      description: Withdraws money from an account
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Withdrawal amount
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/requests.WithdrawRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.TransactionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Withdraw funds
+      tags:
+      - transactions
+swagger: "2.0"

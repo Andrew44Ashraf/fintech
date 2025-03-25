@@ -2,35 +2,49 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:latest
+    image: postgres:15-alpine  # More lightweight than latest
     container_name: fintech_db
-    restart: always
+    restart: unless-stopped    # Better than always for production
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: password  # TODO: Allows env var override
       POSTGRES_DB: fintech_db
     ports:
       - "5432:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:  # Added health check
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: fintech_service
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # Wait for healthy DB
     environment:
+      DB_HOST: db
+      DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: password
       DB_NAME: fintech_db
-      DB_HOST: db
-      DB_PORT: 5432
+      DB_SSL_MODE: disable  # Enable for production with proper certs
+      GIN_MODE: release
     ports:
       - "8080:8080"
-    command: ["./fintech_service"]
     volumes:
-      - .:/app # Mounts your local files inside the container
+      - ./migrations:/app/migrations  
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 volumes:
-  db-data:
+  postgres_data: 

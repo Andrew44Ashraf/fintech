@@ -2,17 +2,31 @@ package routes
 
 import (
 	"github.com/Andrew44Ashraf/fintech-service/internal/handlers"
+	"github.com/Andrew44Ashraf/fintech-service/internal/repository"
 	"github.com/gin-gonic/gin"
+	"database/sql"
 )
 
-// SetupRoutes defines API routes
-func SetupRoutes(router *gin.Engine) {
+// SetupRoutes initializes all API routes with dependency injection
+func SetupRoutes(router *gin.Engine, db *sql.DB) {
+	// Initialize repositories
+	accountRepo := repository.NewAccountRepository(db)
+	transactionRepo := repository.NewTransactionRepository(db)
+
+	// Initialize handlers
+	accountHandler := handlers.NewAccountHandler(accountRepo)
+	transactionHandler := handlers.NewTransactionHandler(transactionRepo, accountRepo)
+
+	// API routes
 	api := router.Group("/api")
 	{
-		api.POST("/accounts", handlers.OpenAccount)
-		api.GET("/accounts/:id/balance", handlers.GetBalance)
-		api.POST("/accounts/:id/deposit", handlers.Deposit)
-		api.POST("/accounts/:id/withdraw", handlers.Withdraw)
-		api.GET("/accounts/:id/transactions", handlers.GetTransactions) // Supports ?limit=10&offset=0
+		// Account routes
+		api.POST("/accounts", accountHandler.OpenAccount)
+		api.GET("/accounts/:id/balance", accountHandler.GetBalance)
+
+		// Transaction routes
+		api.POST("/accounts/:id/deposit", transactionHandler.Deposit)
+		api.POST("/accounts/:id/withdraw", transactionHandler.Withdraw)
+		api.GET("/accounts/:id/transactions", transactionHandler.GetTransactions) // ?limit=10&offset=0
 	}
 }

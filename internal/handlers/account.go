@@ -1,56 +1,98 @@
 package handlers
 
 import (
-	"github.com/Andrew44Ashraf/fintech-service/internal/database"
-	"github.com/Andrew44Ashraf/fintech-service/internal/repository"
-	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
-	"strconv"
+    "context"
+    "github.com/Andrew44Ashraf/fintech-service/internal/dtos/responses"
+    "github.com/Andrew44Ashraf/fintech-service/internal/repository"
+    "github.com/gin-gonic/gin"
+    "log"
+    "net/http"
+    "strconv"
+    "time"
 )
+
+type AccountHandler struct {
+    accountRepo *repository.AccountRepository
+}
+
+func NewAccountHandler(repo *repository.AccountRepository) *AccountHandler {
+    return &AccountHandler{accountRepo: repo}
+}
 
 // OpenAccount godoc
 // @Summary Create a new account
-// @Description Opens a new account with a default balance of 0
+// @Description Opens a new account with optional initial balance
 // @Tags accounts
 // @Accept json
 // @Produce json
-// @Success 200 {object} map[string]int "Returns account ID"
-// @Failure 500 {object} map[string]string "Server error"
+// @Param request body requests.OpenAccountRequest false "Optional initial balance"
+// @Success 200 {object} responses.AccountResponse
+// @Failure 400 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
 // @Router /accounts [post]
-func OpenAccount(c *gin.Context) {
-	accountID, err := repository.CreateAccount(database.DB)
-	if err != nil {
-		log.Println("Failed to create account:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create account"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"account_id": accountID})
+func (h *AccountHandler) OpenAccount(c *gin.Context) {
+    ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+    defer cancel()
+
+    var req requests.OpenAccountRequest
+    if err := c.ShouldBindJSON(&req); err != nil && err != io.EOF {
+        c.JSON(http.StatusBadRequest, responses.NewErrorResponse("invalid request"))
+        return
+    }
+
+    accountID, err := h.accountRepo.CreateAccount(ctx, req.InitialBalance)
+    if err != nil {
+        log.Printf("OpenAccount failed: %v", err)
+        
+        switch {
+        case errors.Is(err, repository.ErrNegativeBalance):
+            c.JSON(http.StatusBadRequest, responses.NewErrorResponse("initial balance cannot be negative"))
+        default:
+            c.JSON(http.StatusInternalServerError, responses.NewErrorResponse("failed to create account"))
+        }
+        return
+    }
+
+    c.JSON(http.StatusOK, responses.AccountResponse{
+        AccountID: accountID,
+    })
 }
 
 // GetBalance godoc
 // @Summary Get account balance
-// @Description Returns the current balance of an account
 // @Tags accounts
-// @Accept json
-// @Produce json
 // @Param id path int true "Account ID"
-// @Success 200 {object} map[string]float64 "Returns balance"
-// @Failure 400 {object} map[string]string "Invalid account ID"
-// @Failure 500 {object} map[string]string "Server error"
+// @Success 200 {object} responses.BalanceResponse
+// @Failure 400 {object} responses.ErrorResponse
+// @Failure 404 {object} responses.ErrorResponse
+// @Failure 500 {object} responses.ErrorResponse
 // @Router /accounts/{id}/balance [get]
-func GetBalance(c *gin.Context) {
-	accountID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid account ID"})
-		return
-	}
+func (h *AccountHandler) GetBalance(c *gin.Context) {
+    ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
+    defer cancel()
 
-	balance, err := repository.GetAccountBalance(database.DB, accountID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "account not found"})
-		return
-	}
+    accountID, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        c.JSON(http.StatusBadRequest, responses.NewErrorResponse("invalid account ID"))
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"balance": balance})
+    balance, err := h.accountRepo.GetAccountBalance(ctx, accountID)
+    if err != nil {
+        log.Printf("GetBalance failed: %v", err)
+        
+        switch {
+        case errors.Is(err, repository.ErrAccountNotFound):
+            c.JSON(http.StatusNotFound, responses.NewErrorResponse("account not found"))
+        case errors.Is(err, repository.ErrAccountAlreadyClosed):
+            c.JSON(http.StatusGone, responses.NewErrorResponse("account is closed"))
+        default:
+            c.JSON(http.StatusInternalServerError, responses.NewErrorResponse("failed to get balance"))
+        }
+        return
+    }
+
+    c.JSON(http.StatusOK, responses.BalanceResponse{
+        Balance: balance,
+    })
 }
