@@ -1,49 +1,47 @@
-# Fintech Service
+#  Fintech Service
 
 A Go microservice for account and transaction management with PostgreSQL.
 
-## Quick Start
+---
+
+##  Quick Start
 
 ```bash
-# Clone and run
+# Clone the repository
 git clone https://github.com/Andrew44Ashraf/fintech-service.git
 cd fintech-service
+
+# Run the service using Docker
 docker-compose up --build
 
+--- 
+## Installation
 
-Installation
 git clone https://github.com/Andrew44Ashraf/fintech-service.git
 cd fintech-service
-go mod init github.com/Andrew44Ashraf/fintech-service
-go mod tidy
-docker-compose up --build
-
-Local Development
-Start PostgreSQL: locally or using docker.
-go run cmd/migrate/main.go
-go run cmd/main.go
-
-
-Prerequisites
-Go 1.21+
-
-Docker & Docker Compose
- Installation
 
 # Initialize Go modules
 go mod init github.com/Andrew44Ashraf/fintech-service
 go mod tidy
 
-# Start services
+# Run the application using Docker
 docker-compose up --build
 
 
-🛠️ Local Development
-# Start just PostgreSQL
+
+Local Development
+Start PostgreSQL (either locally or using Docker)
+
 docker-compose up -d db
+Run Migrations
 
-# Run migrations
+
 go run cmd/migrate/main.go
+Start the Application
 
-# Start application
+
 go run cmd/main.go
+📌 Prerequisites
+Go 1.21+
+
+Docker & Docker Compose
